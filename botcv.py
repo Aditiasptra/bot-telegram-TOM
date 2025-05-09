@@ -1,26 +1,22 @@
-
 import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 from datetime import datetime
 
-TOKEN = "7385197009:AAFGxZ03-HmpKQcy6pvH2DvhwmKKWq483s4"  # Ganti dengan token kamu
-AUTHORIZED_USERS = [7115511137]  # Ganti dengan user ID kamu
-PER_FILE_LIMIT = 1000  # Default jumlah per file
-NAME_PREFIX = "Kontak"  # Default prefix nama kontak
+TOKEN = os.getenv("7385197009:AAFGxZ03-HmpKQcy6pvH2DvhwmKKWq483s4")  # Ambil dari variabel lingkungan
+AUTHORIZED_USERS = [7115511137]
+PER_FILE_LIMIT = 1000
+NAME_PREFIX = "Kontak"
 
-# Cek otorisasi
 def is_authorized(update):
     return update.effective_user.id in AUTHORIZED_USERS
 
-# /start command
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update):
         await update.message.reply_text("Akses ditolak.")
         return
     await update.message.reply_text("Selamat datang! Kirim file .txt berisi daftar nomor (satu per baris) atau Nama,Nomor.")
 
-# /setjumlah command
 async def set_jumlah(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global PER_FILE_LIMIT
     if not is_authorized(update):
@@ -33,7 +29,6 @@ async def set_jumlah(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         await update.message.reply_text("Format salah. Contoh: /setjumlah 1000")
 
-# /setprefix command
 async def set_prefix(update: Update, context: ContextTypes.DEFAULT_TYPE):
     global NAME_PREFIX
     if not is_authorized(update):
@@ -46,7 +41,6 @@ async def set_prefix(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except:
         await update.message.reply_text("Format salah. Contoh: /setprefix NamaSaya")
 
-# Fungsi konversi ke VCF
 def txt_to_vcf(content, per_file=PER_FILE_LIMIT):
     lines = content.splitlines()
     part = 1
@@ -88,7 +82,6 @@ def txt_to_vcf(content, per_file=PER_FILE_LIMIT):
 
     return results
 
-# Handler file
 async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     if not is_authorized(update):
         await update.message.reply_text("Akses ditolak.")
@@ -113,7 +106,6 @@ async def handle_file(update: Update, context: ContextTypes.DEFAULT_TYPE):
     except Exception as e:
         await update.message.reply_text(f"Terjadi kesalahan: {str(e)}")
 
-# Main
 if __name__ == '__main__':
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
